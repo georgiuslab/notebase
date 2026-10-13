@@ -1,0 +1,18 @@
+services:
+  backend:
+    build: .
+    container_name: notebase-backend
+    ports:
+      - "9090:${APP_PORT}"
+    environment:
+      - APP_PORT=${APP_PORT}
+      - SPRING_DATASOURCE_URL=${DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=${JWT_ISSUER_URL}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=${HIBERNATE_DDL}
+      - APP_ALLOWED_EMAIL_DOMAIN=${ALLOWED_EMAIL}
+      - APP_CORS_ORIGINS=*
+    env_file:
+      - .env
+    restart: always
