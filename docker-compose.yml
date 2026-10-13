@@ -3,7 +3,7 @@ services:
     build: .
     container_name: notebase-backend
     ports:
-      - "9090:${APP_PORT}"
+      - "9091:${APP_PORT}"
     environment:
       - APP_PORT=${APP_PORT}
       - SPRING_DATASOURCE_URL=${DB_URL}
