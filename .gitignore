@@ -1,0 +1,14 @@
+# IDEs and Editors
+.idea/
+*.iml
+.DS_Store
+
+# Maven Build files
+target/
+.mvn/
+
+# Environment and sensitive files
+.env
+
+# Docker logs
+*.log

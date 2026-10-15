@@ -1,0 +1,25 @@
+services:
+  notebase-backend:
+    build: ./notebase-backend
+    container_name: notebase-backend
+    ports:
+      - "9093:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=${DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=${ISSUER_URI}
+    restart: always
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "9091:8080"
+    environment:
+      - ISSUER_URI=${ISSUER_URI}
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - GATEWAY_ID=${GATEWAY_ID}
+      - GATEWAY_URI=${GATEWAY_URI}
+    restart: always
