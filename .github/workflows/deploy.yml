@@ -28,6 +28,6 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/${{ secrets.EC2_USER }}/notebase-app
+            cd /home/${{ secrets.EC2_USER }}/uniProject/notebase
             docker compose down
             docker compose up --build -d
