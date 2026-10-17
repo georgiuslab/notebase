@@ -20,6 +20,7 @@ public class TestController {
     }
 
     @GetMapping("/materials")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> getMaterials(@AuthenticationPrincipal Jwt jwt) {
         String firstName = jwt.getClaimAsString("given_name");
         String lastName = jwt.getClaimAsString("family_name");

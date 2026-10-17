@@ -3,7 +3,7 @@ services:
     build: ./notebase-backend
     container_name: notebase-backend
     ports:
-      - "9093:8080"
+      - "127.0.0.1:9093:8081"
     environment:
       - SPRING_DATASOURCE_URL=${DB_URL}
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
@@ -22,4 +22,5 @@ services:
       - CLIENT_SECRET=${CLIENT_SECRET}
       - GATEWAY_ID=${GATEWAY_ID}
       - GATEWAY_URI=${GATEWAY_URI}
+      - FRONTEND_URL=${FRONTEND_URL}
     restart: always
