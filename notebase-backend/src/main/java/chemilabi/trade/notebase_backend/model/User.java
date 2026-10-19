@@ -18,22 +18,22 @@ import java.time.OffsetDateTime;
 public class User {
 
     @Id
-    @Column(name = "keycloak_id", nullable = false, unique = true, length = 255)
+    @Column(name = "keycloak_id", nullable = false, unique = true)
     private String keycloakId;
 
-    @Column(name = "email", nullable = false, unique = true, length = 255)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "first_name", length = 255)
+    @Column(name = "first_name")
     private String firstName;
 
-    @Column(name = "last_name", length = 255)
+    @Column(name = "last_name")
     private String lastName;
 
     @Column(name = "role", length = 50)
     private String role;
 
-    @Column(name = "is_deleted", length = 50)
+    @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
     @CreationTimestamp
