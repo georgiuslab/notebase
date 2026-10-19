@@ -31,7 +31,7 @@ public class BackendSecurityConfig {
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuer;
 
-    @Value("${app.allowed-email-domain:sangu.edu.ge}")
+    @Value("${app.allowed-email-domain}")
     private String allowedDomain;
 
     @Bean

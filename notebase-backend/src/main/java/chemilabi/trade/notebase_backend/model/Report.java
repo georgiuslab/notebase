@@ -1,10 +1,7 @@
 package chemilabi.trade.notebase_backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "reports")
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Report {
@@ -31,6 +29,7 @@ public class Report {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String reason;
 
+    //აქაც ენამი გვინდა
     @Column(nullable = false, length = 50)
     private String status; // PENDING, RESOLVED, DISMISSED
 

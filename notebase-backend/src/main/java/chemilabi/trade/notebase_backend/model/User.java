@@ -1,17 +1,17 @@
 package chemilabi.trade.notebase_backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.OffsetDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,4 +39,16 @@ public class User {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime createdAt;
+
+    @OneToMany(mappedBy = "actor")
+    private Set<AuditLog> auditLogs = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Like> likes = new HashSet<>();
+
+    @OneToMany(mappedBy = "uploader")
+    private Set<Material> materials = new HashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<Report> reports = new HashSet<>();
 }

@@ -1,19 +1,16 @@
 package chemilabi.trade.notebase_backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "materials")
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Material {
@@ -31,6 +28,7 @@ public class Material {
     @Column(name = "file_url", nullable = false, length = 500)
     private String fileUrl;
 
+    //აქაც გვჭირდება ენამი
     @Column(nullable = false)
     private String status; // PENDING, APPROVED, REJECTED
 
@@ -55,6 +53,12 @@ public class Material {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "material", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Like> likes = new HashSet<>();
+
+    @OneToMany(mappedBy = "material")
+    private Set<Report> reports = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
