@@ -19,8 +19,8 @@ public class TestController {
         this.userService = userService;
     }
 
-    @GetMapping("/materials")
-    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/moderator")
+    @PreAuthorize("hasAnyRole('ADMIN','MODERATOR')")
     public ResponseEntity<String> getMaterials(@AuthenticationPrincipal Jwt jwt) {
         String firstName = jwt.getClaimAsString("given_name");
         String lastName = jwt.getClaimAsString("family_name");
@@ -29,6 +29,12 @@ public class TestController {
         return ResponseEntity.ok("მოგესალმები, "
                 + firstName + " " + lastName
                 + " (" + email + ")! ტოკენი წარმატებით შემოწმდა ბექენდში.");
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> getAdmin(@AuthenticationPrincipal Jwt jwt) {
+        return  ResponseEntity.ok("ეს არის ადმინის პანელი");
     }
 
     @GetMapping("/auth")

@@ -1,10 +1,7 @@
 package chemilabi.trade.notebase_backend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "audit_logs")
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuditLog {
@@ -24,10 +22,11 @@ public class AuditLog {
     @JoinColumn(name = "actor_id", referencedColumnName = "keycloak_id", nullable = false)
     private User actor;
 
-    @Column(nullable = false, length = 100)
+    //აქ სჯობს რომ ენამი გვქონდეს
+    @Column(name = "action", nullable = false, length = 100)
     private String action; // მაგ: "APPROVE_MATERIAL", "BAN_USER"
 
-    @Column(name = "target_id")
+    @Column(name = "target_id", nullable = false)
     private Long targetId;
 
     @Column(columnDefinition = "TEXT")

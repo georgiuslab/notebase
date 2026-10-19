@@ -3,10 +3,15 @@ package chemilabi.trade.notebase_backend.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 @Entity
 @Table(name = "faculties")
-@Data
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Faculty {
@@ -17,5 +22,8 @@ public class Faculty {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "faculty")
+    private Set<Subject> subjects = new HashSet<>();
 
 }
