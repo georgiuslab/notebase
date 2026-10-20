@@ -32,7 +32,8 @@ public class GatewaySecurityConfig {
         http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/login/oauth2/code/**", "/oauth2/**", "/login/**").permitAll()
+                        .pathMatchers("/login/oauth2/code/**", "/oauth2/**", "/login/**",
+                                "/v3/api-docs/**", "/api/v3/api-docs/**", "/swagger-ui/**", "/webjars/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2Login(login -> login
