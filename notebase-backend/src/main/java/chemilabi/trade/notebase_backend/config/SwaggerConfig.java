@@ -16,7 +16,7 @@ public class SwaggerConfig {
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     private String issuerUri;
 
-    @Value("server.uri")
+    @Value("${server.uri}")
     private String serverURL;
 
     @Bean
