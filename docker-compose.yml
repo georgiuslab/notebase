@@ -9,6 +9,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=${ISSUER_URI}
+      - SWAGGER_PATH=${SWAGGER_PATH}
     restart: always
 
   api-gateway:
@@ -23,4 +24,5 @@ services:
       - GATEWAY_ID=${GATEWAY_ID}
       - GATEWAY_URI=${GATEWAY_URI}
       - FRONTEND_URL=${FRONTEND_URL}
+      - SWAGGER_PATH=${SWAGGER_PATH}
     restart: always
