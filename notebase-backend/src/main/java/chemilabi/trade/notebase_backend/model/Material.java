@@ -1,5 +1,6 @@
 package chemilabi.trade.notebase_backend.model;
 
+import chemilabi.trade.notebase_backend.model.enums.MaterialStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,21 +29,17 @@ public class Material {
     @Column(name = "file_url", nullable = false, length = 500)
     private String fileUrl;
 
-    //აქაც გვჭირდება ენამი
     @Column(nullable = false)
-    private String status; // PENDING, APPROVED, REJECTED
+    private MaterialStatus status;
 
-    // კავშირი მომხმარებელთან (Keycloak ID-ზე მიბმა)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploader_id", referencedColumnName = "keycloak_id", nullable = false)
     private User uploader;
 
-    // კავშირი საგანთან
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_id", nullable = false)
     private Subject subject;
 
-    // თეგების მიბმა (Many-to-Many)
     @ManyToMany
     @JoinTable(
             name = "material_tag_mapping",
@@ -64,7 +61,7 @@ public class Material {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         if (this.status == null) {
-            this.status = "PENDING";
+            this.status = MaterialStatus.PENDING;
         }
     }
 }
