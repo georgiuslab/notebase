@@ -1,5 +1,6 @@
 package chemilabi.trade.notebase_backend.model;
 
+import chemilabi.trade.notebase_backend.model.enums.AuditAction;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,12 +23,11 @@ public class AuditLog {
     @JoinColumn(name = "actor_id", referencedColumnName = "keycloak_id", nullable = false)
     private User actor;
 
-    //აქ სჯობს რომ ენამი გვქონდეს
     @Column(name = "action", nullable = false, length = 100)
-    private String action; // მაგ: "APPROVE_MATERIAL", "BAN_USER"
+    private AuditAction action;
 
-    @Column(name = "target_id", nullable = false)
-    private Long targetId;
+    @Column(name = "target", nullable = false)
+    private String target;
 
     @Column(columnDefinition = "TEXT")
     private String details;

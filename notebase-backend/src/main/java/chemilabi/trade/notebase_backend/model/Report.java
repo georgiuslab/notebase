@@ -1,5 +1,6 @@
 package chemilabi.trade.notebase_backend.model;
 
+import chemilabi.trade.notebase_backend.model.enums.ReportStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,9 +30,8 @@ public class Report {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String reason;
 
-    //აქაც ენამი გვინდა
     @Column(nullable = false, length = 50)
-    private String status; // PENDING, RESOLVED, DISMISSED
+    private ReportStatus status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -40,7 +40,7 @@ public class Report {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         if (this.status == null) {
-            this.status = "PENDING";
+            this.status = ReportStatus.PENDING;
         }
     }
 }
