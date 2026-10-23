@@ -44,18 +44,18 @@ public class MaterialService {
         User uploader = userRepository.findByKeycloakId(keycloakId)
                 .orElseThrow(() -> new UsernameNotFoundException("იუზერი ვერ მოიძებნა"));
 
-        Subject subject = subjectRepository.findById(dto.getSubjectId())
+        Subject subject = subjectRepository.findById(dto.subjectId())
                 .orElseThrow(() -> new RuntimeException("საგანი ვერ მოიძებნა"));
 
-        Set<MaterialTag> managedTags = dto.getTagNames().stream().map(tagName ->
+        Set<MaterialTag> managedTags = dto.tagNames().stream().map(tagName ->
                 materialTagRepository.findByName(tagName)
                         .orElseGet(() -> materialTagRepository.save(MaterialTag.builder().name(tagName).build()))
         ).collect(Collectors.toSet());
 
         Material material = Material.builder()
-                .title(dto.getTitle())
-                .description(dto.getDescription())
-                .fileUrl(dto.getFileUrl())
+                .title(dto.title())
+                .description(dto.description())
+                .fileUrl(dto.fileUrl())
                 .status(MaterialStatus.PENDING)
                 .uploader(uploader)
                 .subject(subject)
