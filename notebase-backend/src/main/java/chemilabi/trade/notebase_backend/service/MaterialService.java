@@ -1,6 +1,7 @@
 package chemilabi.trade.notebase_backend.service;
 
 import chemilabi.trade.notebase_backend.dto.MaterialResponseDto;
+import chemilabi.trade.notebase_backend.dto.UserSummaryDto;
 import chemilabi.trade.notebase_backend.model.Material;
 import chemilabi.trade.notebase_backend.model.MaterialTag;
 import chemilabi.trade.notebase_backend.model.Subject;
@@ -15,6 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,18 +68,33 @@ public class MaterialService {
     }
 
     public List<MaterialResponseDto> getAllMaterials() {
-        return materialRepository.findAll().stream().map(
-                material -> MaterialResponseDto.builder()
-                        .id(material.getId())
-                        .title(material.getTitle())
-                        .description(material.getDescription())
-                        .fileUrl(material.getFileUrl())
-                        .status(material.getStatus().name())
-                        .uploaderEmail(material.getUploader().getEmail())
-                        .subjectName(material.getSubject().getName())
-                        .tags(material.getTags().stream().map(MaterialTag::getName).collect(Collectors.toSet()))
-                        .createdAt(material.getCreatedAt())
-                        .build()
-                ).collect(Collectors.toList());
+        return materialRepository.findAll().stream()
+                .map(this::convertToDto)
+                .toList();
     }
+
+private MaterialResponseDto convertToDto(Material material) {
+    return new MaterialResponseDto(
+            material.getId(),
+            material.getTitle(),
+            material.getDescription(),
+            material.getFileUrl(),
+            material.getStatus() != null ? material.getStatus().name() : null,
+
+            material.getUploader() != null ? new UserSummaryDto(
+                    material.getUploader().getKeycloakId(),
+                    material.getUploader().getFirstName(),
+                    material.getUploader().getLastName(),
+                    material.getUploader().getEmail()
+            ) : null,
+
+            material.getSubject() != null ? material.getSubject().getName() : null,
+
+            material.getTags() != null ? material.getTags().stream()
+                    .map(MaterialTag::getName)
+                    .collect(Collectors.toSet()) : new HashSet<>(),
+
+            material.getCreatedAt()
+    );
+}
 }
