@@ -33,7 +33,18 @@ public class MaterialController {
     public ResponseEntity<Map<String, String>> getPresignedUrl(
             @RequestParam String fileName,
             @RequestParam String contentType,
+            @RequestParam long fileSize,
             Principal principal) {
+
+        if (!"application/pdf".equalsIgnoreCase(contentType) ||
+                !fileName.toLowerCase().endsWith(".pdf")) {
+            throw new IllegalArgumentException("დასაშვებია მხოლოდ PDF ფაილების ატვირთვა");
+        }
+
+        long maxSizeBytes = 20L * 1024 * 1024; //20MB
+        if (fileSize > maxSizeBytes) {
+            throw new IllegalArgumentException("ფაილის ზომა არ უნდა აღემატებოდეს 20MB-ს");
+        }
 
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) principal;
         String userEmail = jwtToken.getToken().getClaimAsString("email");

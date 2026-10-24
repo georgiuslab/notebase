@@ -2,6 +2,8 @@ package chemilabi.trade.notebase_backend.service;
 
 import chemilabi.trade.notebase_backend.dto.MaterialResponseDto;
 import chemilabi.trade.notebase_backend.dto.UserSummaryDto;
+import chemilabi.trade.notebase_backend.exception.ResourceNotFoundException;
+import chemilabi.trade.notebase_backend.exception.UserNotFoundException;
 import chemilabi.trade.notebase_backend.model.Material;
 import chemilabi.trade.notebase_backend.model.MaterialTag;
 import chemilabi.trade.notebase_backend.model.Subject;
@@ -42,10 +44,10 @@ public class MaterialService {
         String keycloakId = token.getToken().getSubject();
 
         User uploader = userRepository.findByKeycloakId(keycloakId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + keycloakId +  " not found"));
 
         Subject subject = subjectRepository.findById(dto.subjectId())
-                .orElseThrow(() -> new RuntimeException("Subject not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Subject with ID " + dto.subjectId() + " not found"));
 
         Set<MaterialTag> managedTags = dto.tagNames().stream().map(tagName ->
                 materialTagRepository.findByName(tagName)
@@ -72,7 +74,7 @@ public class MaterialService {
                 .map(MaterialResponseDto::fromEntity)
                 .toList();
         if (allMaterials.isEmpty()){
-            throw new RuntimeException("No material found");
+            throw new ResourceNotFoundException("No material found");
         }
         return allMaterials;
     }
