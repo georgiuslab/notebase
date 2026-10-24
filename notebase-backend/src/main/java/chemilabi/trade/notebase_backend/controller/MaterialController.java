@@ -46,9 +46,10 @@ public class MaterialController {
     @Operation(summary = "ფაილის PreSignedURL-ით წარმატებული ატვირთვის მერე დადასტურება",
             description = "ინახავს ფაილის მონაცემებს ბაზაში")
     @PostMapping("/confirm")
-    public ResponseEntity<String> confirmUpload(@RequestBody MaterialCreateDto dto, Principal principal) {
+    public ResponseEntity<MaterialResponseDto> confirmUpload(@RequestBody MaterialCreateDto dto, Principal principal) {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) principal;
-        String response = materialService.saveMaterial(jwtToken, dto);
+        MaterialResponseDto response = materialService.saveMaterial(jwtToken, dto);
+
         return ResponseEntity.ok(response);
     }
 

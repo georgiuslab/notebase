@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+//ექსეფშენები მაქვს დასამუშავებელი!!!
 @Service
 public class MaterialService {
     private final MaterialRepository materialRepository;
@@ -38,14 +38,14 @@ public class MaterialService {
         this.materialTagRepository = materialTagRepository;
     }
 
-    public String saveMaterial(JwtAuthenticationToken token, MaterialCreateDto dto) {
+    public MaterialResponseDto saveMaterial(JwtAuthenticationToken token, MaterialCreateDto dto) {
         String keycloakId = token.getToken().getSubject();
 
         User uploader = userRepository.findByKeycloakId(keycloakId)
-                .orElseThrow(() -> new UsernameNotFoundException("იუზერი ვერ მოიძებნა"));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         Subject subject = subjectRepository.findById(dto.subjectId())
-                .orElseThrow(() -> new RuntimeException("საგანი ვერ მოიძებნა"));
+                .orElseThrow(() -> new RuntimeException("Subject not found"));
 
         Set<MaterialTag> managedTags = dto.tagNames().stream().map(tagName ->
                 materialTagRepository.findByName(tagName)
@@ -62,39 +62,18 @@ public class MaterialService {
                 .tags(managedTags)
                 .build();
 
-        materialRepository.save(material);
+        Material savedMaterial = materialRepository.save(material);
 
-        return "მასალა წარმატებით აიტვირთდა და ელოდება მოდერაციას!";
+        return MaterialResponseDto.fromEntity(savedMaterial);
     }
 
     public List<MaterialResponseDto> getAllMaterials() {
-        return materialRepository.findAll().stream()
-                .map(this::convertToDto)
+        List<MaterialResponseDto> allMaterials = materialRepository.findAll().stream()
+                .map(MaterialResponseDto::fromEntity)
                 .toList();
+        if (allMaterials.isEmpty()){
+            throw new RuntimeException("No material found");
+        }
+        return allMaterials;
     }
-
-private MaterialResponseDto convertToDto(Material material) {
-    return new MaterialResponseDto(
-            material.getId(),
-            material.getTitle(),
-            material.getDescription(),
-            material.getFileUrl(),
-            material.getStatus() != null ? material.getStatus().name() : null,
-
-            material.getUploader() != null ? new UserSummaryDto(
-                    material.getUploader().getKeycloakId(),
-                    material.getUploader().getFirstName(),
-                    material.getUploader().getLastName(),
-                    material.getUploader().getEmail()
-            ) : null,
-
-            material.getSubject() != null ? material.getSubject().getName() : null,
-
-            material.getTags() != null ? material.getTags().stream()
-                    .map(MaterialTag::getName)
-                    .collect(Collectors.toSet()) : new HashSet<>(),
-
-            material.getCreatedAt()
-    );
-}
 }

@@ -1,5 +1,6 @@
 package chemilabi.trade.notebase_backend.controller;
 
+import chemilabi.trade.notebase_backend.dto.UserDetailsResponseDto;
 import chemilabi.trade.notebase_backend.model.User;
 import chemilabi.trade.notebase_backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,7 +24,7 @@ public class UserController {
     @Operation(summary = "მომხმარებლის სინქრონიზაცია", description = "ახდენს ავტორიზირებული მომხმარებლის " +
             "სინქრონიზაციას ბაზასთან და აბრუნებს მის მონაცემებს")
     @GetMapping("/auth")
-    public User getAuth(@AuthenticationPrincipal Jwt jwt) {
-        return userService.syncUser(jwt);
+    public ResponseEntity<UserDetailsResponseDto> getAuth(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok().body(userService.syncUser(jwt));
     }
 }
