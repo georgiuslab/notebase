@@ -40,4 +40,4 @@ services:
 
 networks:
   notebase-shared-net:
-    driver: bridge
+    external: true
