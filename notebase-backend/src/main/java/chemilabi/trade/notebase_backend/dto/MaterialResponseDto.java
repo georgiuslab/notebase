@@ -1,7 +1,12 @@
 package chemilabi.trade.notebase_backend.dto;
 
+import chemilabi.trade.notebase_backend.model.Material;
+import chemilabi.trade.notebase_backend.model.MaterialTag;
+
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public record MaterialResponseDto(
         Long id,
@@ -13,4 +18,24 @@ public record MaterialResponseDto(
         String subjectName,
         Set<String> tags,
         LocalDateTime createdAt
-) {}
+) {
+    public static MaterialResponseDto fromEntity(Material material) {
+        Set<String> tagNames = material.getTags() != null
+                ? material.getTags().stream()
+                .map(MaterialTag::getName)
+                .collect(Collectors.toSet())
+                : Collections.emptySet();
+
+        return new MaterialResponseDto(
+                material.getId(),
+                material.getTitle(),
+                material.getDescription(),
+                material.getFileUrl(),
+                material.getStatus().name(),
+                UserSummaryDto.fromEntity(material.getUploader()),
+                material.getSubject().getName(),
+                tagNames,
+                material.getCreatedAt()
+        );
+    }
+}

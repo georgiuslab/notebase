@@ -1,5 +1,6 @@
 package chemilabi.trade.notebase_backend.service;
 
+import chemilabi.trade.notebase_backend.dto.UserDetailsResponseDto;
 import chemilabi.trade.notebase_backend.model.User;
 import chemilabi.trade.notebase_backend.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+//ექსეფშენები მაქვს დასამუშავებელი!!!
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -20,7 +22,7 @@ public class UserService {
 
     @Transactional
     @CacheEvict(value = "users", key = "#jwt.subject")
-    public User syncUser(Jwt jwt) {
+    public UserDetailsResponseDto syncUser(Jwt jwt) {
         String keycloakId = jwt.getSubject();
 
         User u = userRepository.findById(keycloakId).orElseGet(() -> {
@@ -49,7 +51,9 @@ public class UserService {
             u.setRole("USER");
         }
 
-        return userRepository.save(u);
+        User savedUser = userRepository.save(u);
+
+        return UserDetailsResponseDto.fromEntity(savedUser);
     }
 
 }
