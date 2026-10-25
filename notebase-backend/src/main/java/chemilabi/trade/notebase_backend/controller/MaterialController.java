@@ -3,6 +3,7 @@ package chemilabi.trade.notebase_backend.controller;
 import chemilabi.trade.notebase_backend.aws.S3Service;
 import chemilabi.trade.notebase_backend.dto.MaterialCreateDto;
 import chemilabi.trade.notebase_backend.dto.MaterialResponseDto;
+import chemilabi.trade.notebase_backend.dto.PresignedUrlResponseDto;
 import chemilabi.trade.notebase_backend.service.MaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class MaterialController {
     @Operation(summary = "PreSignedURL-ის გამოთხოვა ბაზიდან",
             description = "აბრუნებს ბმულს, რომლის მეშვეობითაც S3-ზე აიტვირთება ფაილი, ბმული ძალაშია 10 წუთი")
     @GetMapping("/presigned-url")
-    public ResponseEntity<Map<String, String>> getPresignedUrl(
+    public ResponseEntity<PresignedUrlResponseDto> getPresignedUrl(
             @RequestParam String fileName,
             @RequestParam String contentType,
             @RequestParam long fileSize,
@@ -50,8 +51,8 @@ public class MaterialController {
         String userEmail = jwtToken.getToken().getClaimAsString("email");
         String safeEmail = userEmail != null ? userEmail.replaceAll("[^a-zA-Z0-9-_.]", "_") : "anonymous";
 
-        String url = s3Service.generatePresignedUploadUrl(fileName, contentType, safeEmail);
-        return ResponseEntity.ok(Collections.singletonMap("uploadUrl", url));
+        PresignedUrlResponseDto url = s3Service.generatePresignedUploadUrl(fileName, contentType, safeEmail);
+        return ResponseEntity.ok(url);
     }
 
     @Operation(summary = "ფაილის PreSignedURL-ით წარმატებული ატვირთვის მერე დადასტურება",

@@ -1,5 +1,6 @@
 package chemilabi.trade.notebase_backend.aws;
 
+import chemilabi.trade.notebase_backend.dto.PresignedUrlResponseDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -32,7 +33,7 @@ public class S3Service {
                 .build();
     }
 
-    public String generatePresignedUploadUrl(String fileName, String contentType, String userEmail) {
+    public PresignedUrlResponseDto generatePresignedUploadUrl(String fileName, String contentType, String userEmail) {
         String key = "pdfs/" + userEmail + "/" + UUID.randomUUID() + "_" + fileName;
 
         PutObjectRequest objectRequest = PutObjectRequest.builder()
@@ -48,6 +49,7 @@ public class S3Service {
 
         PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
 
-        return presignedRequest.url().toString();
+        String presignedUrl = presignedRequest.url().toString();
+        return new PresignedUrlResponseDto(presignedUrl, key);
     }
 }
