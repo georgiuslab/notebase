@@ -5,7 +5,7 @@ import java.util.Set;
 public record MaterialCreateDto(
         String title,
         String description,
-        String fileUrl,
+        String fileKey,
         Long subjectId,
         Set<String> tagNames
 ) {}

@@ -57,7 +57,7 @@ public class MaterialService {
         Material material = Material.builder()
                 .title(dto.title())
                 .description(dto.description())
-                .fileUrl(dto.fileUrl())
+                .fileUrl(dto.fileKey())
                 .status(MaterialStatus.PENDING)
                 .uploader(uploader)
                 .subject(subject)
