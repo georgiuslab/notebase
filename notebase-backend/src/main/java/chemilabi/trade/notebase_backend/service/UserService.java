@@ -55,5 +55,12 @@ public class UserService {
 
         return UserDetailsResponseDto.fromEntity(savedUser);
     }
+    public List<User> getAllUsers() {
 
+        List<User> allUsers = userRepository.findAll();
+        if (allUsers.isEmpty()){
+            throw new RuntimeException("No Users found");
+        }
+        return allUsers;
+    }
 }

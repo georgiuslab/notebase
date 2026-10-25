@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 public class UserController {
@@ -26,5 +28,11 @@ public class UserController {
     @GetMapping("/auth")
     public ResponseEntity<UserDetailsResponseDto> getAuth(@AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok().body(userService.syncUser(jwt));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() {
+        List <User> allUsers =  userService.getAllUsers();
+        return ResponseEntity.ok().body(allUsers);
     }
 }
