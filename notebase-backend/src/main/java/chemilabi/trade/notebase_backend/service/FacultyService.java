@@ -1,5 +1,6 @@
 package chemilabi.trade.notebase_backend.service;
 
+import chemilabi.trade.notebase_backend.dto.FacultyResponseDto;
 import chemilabi.trade.notebase_backend.model.Faculty;
 import chemilabi.trade.notebase_backend.repository.FacultyRepository;
 import org.springframework.stereotype.Service;
@@ -15,11 +16,9 @@ public class FacultyService {
         this.facultyRepository = facultyRepository;
     }
 
-    public List<Faculty> getAllFaculties() {
-        List<Faculty> allFaculties = facultyRepository.findAll();
-        if (allFaculties.isEmpty()){
-            throw new RuntimeException("No Faculties Found");
-        }
-        return allFaculties;
+    public List<FacultyResponseDto> getAllFaculties() {
+        return facultyRepository.findAll().stream()
+                .map(FacultyResponseDto::fromEntity)
+                .toList();
     }
 }

@@ -1,6 +1,8 @@
 package chemilabi.trade.notebase_backend.controller;
 
+import chemilabi.trade.notebase_backend.dto.FacultyResponseDto;
 import chemilabi.trade.notebase_backend.dto.UserDetailsResponseDto;
+import chemilabi.trade.notebase_backend.dto.UserSummaryDto;
 import chemilabi.trade.notebase_backend.model.User;
 import chemilabi.trade.notebase_backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,8 +33,11 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List <User> allUsers =  userService.getAllUsers();
-        return ResponseEntity.ok().body(allUsers);
+    public ResponseEntity<List<UserSummaryDto>> getAllUsers() {
+        List <UserSummaryDto> allUsers =  userService.getAllUsers();
+        if (allUsers.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(allUsers);
     }
 }

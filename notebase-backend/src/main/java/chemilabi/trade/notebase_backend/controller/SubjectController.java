@@ -1,5 +1,6 @@
 package chemilabi.trade.notebase_backend.controller;
 
+import chemilabi.trade.notebase_backend.dto.SubjectResponseDto;
 import chemilabi.trade.notebase_backend.model.Faculty;
 import chemilabi.trade.notebase_backend.model.Subject;
 import chemilabi.trade.notebase_backend.service.SubjectService;
@@ -21,8 +22,11 @@ public class SubjectController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Subject>> getAllSubjects() {
-        List<Subject> allSubjects = subjectService.getAllSubjects();
-        return ResponseEntity.ok().body(allSubjects);
+    public ResponseEntity<List<SubjectResponseDto>> getAllSubjects() {
+        List<SubjectResponseDto> subjects = subjectService.getAllSubjects();
+        if (subjects.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(subjects);
     }
 }
