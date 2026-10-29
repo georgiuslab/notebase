@@ -51,4 +51,13 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private Set<Report> reports = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_favorite_materials",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "keycloak_id"),
+            inverseJoinColumns = @JoinColumn(name = "material_id")
+    )
+    @Builder.Default
+    private Set<Material> favorites = new HashSet<>();
 }
