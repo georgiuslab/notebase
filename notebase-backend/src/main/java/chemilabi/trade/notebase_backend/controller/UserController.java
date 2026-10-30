@@ -1,7 +1,9 @@
 package chemilabi.trade.notebase_backend.controller;
 
 import chemilabi.trade.notebase_backend.dto.MaterialResponseDto;
+import chemilabi.trade.notebase_backend.dto.FacultyResponseDto;
 import chemilabi.trade.notebase_backend.dto.UserDetailsResponseDto;
+import chemilabi.trade.notebase_backend.dto.UserSummaryDto;
 import chemilabi.trade.notebase_backend.model.User;
 import chemilabi.trade.notebase_backend.service.MaterialService;
 import chemilabi.trade.notebase_backend.service.UserService;
@@ -42,5 +44,12 @@ public class UserController {
     @GetMapping("/users/{userId}/favorites")
     public ResponseEntity<List<MaterialResponseDto>> getFavoriteMaterials(@PathVariable String userId) {
         return ResponseEntity.ok(materialService.getFavoriteMaterials(userId));
+    @GetMapping
+    public ResponseEntity<List<UserSummaryDto>> getAllUsers() {
+        List <UserSummaryDto> allUsers =  userService.getAllUsers();
+        if (allUsers.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(allUsers);
     }
 }

@@ -1,6 +1,7 @@
 package chemilabi.trade.notebase_backend.service;
 
 import chemilabi.trade.notebase_backend.dto.UserDetailsResponseDto;
+import chemilabi.trade.notebase_backend.dto.UserSummaryDto;
 import chemilabi.trade.notebase_backend.model.User;
 import chemilabi.trade.notebase_backend.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -56,4 +57,9 @@ public class UserService {
         return UserDetailsResponseDto.fromEntity(savedUser);
     }
 
+    public List<UserSummaryDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserSummaryDto::fromEntity)
+                .toList();
+    }
 }
