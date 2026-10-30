@@ -14,6 +14,7 @@ import chemilabi.trade.notebase_backend.repository.MaterialRepository;
 import chemilabi.trade.notebase_backend.repository.MaterialTagRepository;
 import chemilabi.trade.notebase_backend.repository.SubjectRepository;
 import chemilabi.trade.notebase_backend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -77,5 +78,15 @@ public class MaterialService {
             throw new ResourceNotFoundException("No material found");
         }
         return allMaterials;
+    }
+
+    @Transactional
+    public List<MaterialResponseDto> getFavoriteMaterials(String userId) {
+        User user = userRepository.findByKeycloakId(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
+
+        return user.getFavorites().stream()
+                .map(MaterialResponseDto::fromEntity)
+                .toList();
     }
 }
