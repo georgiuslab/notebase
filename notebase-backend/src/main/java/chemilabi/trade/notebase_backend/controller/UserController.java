@@ -4,6 +4,12 @@ import chemilabi.trade.notebase_backend.aws.S3Service;
 import chemilabi.trade.notebase_backend.dto.AvatarUpdateDto;
 import chemilabi.trade.notebase_backend.dto.PresignedUrlResponseDto;
 import chemilabi.trade.notebase_backend.dto.UserDetailsResponseDto;
+import chemilabi.trade.notebase_backend.dto.MaterialResponseDto;
+import chemilabi.trade.notebase_backend.dto.FacultyResponseDto;
+import chemilabi.trade.notebase_backend.dto.UserDetailsResponseDto;
+import chemilabi.trade.notebase_backend.dto.UserSummaryDto;
+import chemilabi.trade.notebase_backend.model.User;
+import chemilabi.trade.notebase_backend.service.MaterialService;
 import chemilabi.trade.notebase_backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +19,12 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -25,6 +37,12 @@ public class UserController {
                           S3Service s3Service) {
         this.userService = userService;
         this.s3Service = s3Service;
+    private final MaterialService materialService;
+
+    public UserController(UserService userService,
+                          MaterialService materialService) {
+        this.userService = userService;
+        this.materialService = materialService;
     }
 
     @Operation(summary = "მომხმარებლის სინქრონიზაცია", description = "ახდენს ავტორიზირებული მომხმარებლის " +
@@ -58,5 +76,19 @@ public class UserController {
         UserDetailsResponseDto userDetailsResponseDto = userService.updateAvatar(keycloakId,dto);
 
         return ResponseEntity.ok(userDetailsResponseDto);
+    @Operation(summary = "მომხმარებლის რჩეული მასალების წამოღება",
+            description = "აბრუნებს მითითებული მომხმარებლის მიერ რჩეულებში დამატებულ მასალებს")
+    @GetMapping("/users/{userId}/favorites")
+    public ResponseEntity<List<MaterialResponseDto>> getFavoriteMaterials(@PathVariable String userId) {
+        return ResponseEntity.ok(materialService.getFavoriteMaterials(userId));
+    }
+    
+    @GetMapping
+    public ResponseEntity<List<UserSummaryDto>> getAllUsers() {
+        List <UserSummaryDto> allUsers =  userService.getAllUsers();
+        if (allUsers.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(allUsers);
     }
 }

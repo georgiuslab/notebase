@@ -4,6 +4,7 @@ import chemilabi.trade.notebase_backend.aws.S3Service;
 import chemilabi.trade.notebase_backend.dto.AvatarUpdateDto;
 import chemilabi.trade.notebase_backend.dto.UserDetailsResponseDto;
 import chemilabi.trade.notebase_backend.exception.UserNotFoundException;
+import chemilabi.trade.notebase_backend.dto.UserSummaryDto;
 import chemilabi.trade.notebase_backend.model.User;
 import chemilabi.trade.notebase_backend.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -74,5 +75,9 @@ public class UserService {
         userRepository.save(user);
         String avatar = s3Service.generatePresignedDownloadUrl(dto.fileKey());
         return UserDetailsResponseDto.fromEntity(user, avatar);
+    public List<UserSummaryDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserSummaryDto::fromEntity)
+                .toList();
     }
 }
