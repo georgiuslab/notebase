@@ -32,16 +32,12 @@ public class UserController {
 
     private final UserService userService;
     private final S3Service s3Service;
-
-    public UserController(UserService userService,
-                          S3Service s3Service) {
-        this.userService = userService;
-        this.s3Service = s3Service;
     private final MaterialService materialService;
 
     public UserController(UserService userService,
-                          MaterialService materialService) {
+                          S3Service s3Service, MaterialService materialService) {
         this.userService = userService;
+        this.s3Service = s3Service;
         this.materialService = materialService;
     }
 
@@ -69,13 +65,15 @@ public class UserController {
 
     @PostMapping("/update/avatar")
     public ResponseEntity<UserDetailsResponseDto> updateAvatar(@RequestBody AvatarUpdateDto dto,
-                                                               Principal principal){
+                                                               Principal principal) {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) principal;
         String keycloakId = jwtToken.getToken().getSubject();
 
-        UserDetailsResponseDto userDetailsResponseDto = userService.updateAvatar(keycloakId,dto);
+        UserDetailsResponseDto userDetailsResponseDto = userService.updateAvatar(keycloakId, dto);
 
         return ResponseEntity.ok(userDetailsResponseDto);
+    }
+    
     @Operation(summary = "მომხმარებლის რჩეული მასალების წამოღება",
             description = "აბრუნებს მითითებული მომხმარებლის მიერ რჩეულებში დამატებულ მასალებს")
     @GetMapping("/users/{userId}/favorites")

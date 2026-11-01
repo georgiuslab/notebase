@@ -75,6 +75,8 @@ public class UserService {
         userRepository.save(user);
         String avatar = s3Service.generatePresignedDownloadUrl(dto.fileKey());
         return UserDetailsResponseDto.fromEntity(user, avatar);
+    }
+
     public List<UserSummaryDto> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(UserSummaryDto::fromEntity)
