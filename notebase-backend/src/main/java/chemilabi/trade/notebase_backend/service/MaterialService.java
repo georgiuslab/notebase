@@ -50,10 +50,13 @@ public class MaterialService {
         Subject subject = subjectRepository.findById(dto.subjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Subject with ID " + dto.subjectId() + " not found"));
 
-        Set<MaterialTag> managedTags = dto.tagNames().stream().map(tagName ->
-                materialTagRepository.findByName(tagName)
-                        .orElseGet(() -> materialTagRepository.save(MaterialTag.builder().name(tagName).build()))
-        ).collect(Collectors.toSet());
+        Set<MaterialTag> managedTags = new HashSet<>();
+        if (dto.tagNames() != null && !dto.tagNames().isEmpty()) {
+            managedTags = materialTagRepository.findAllByNameIn(dto.tagNames());
+        }
+//        if (managedTags.size() != dto.tagNames().size()) {
+//            throw new ResourceNotFoundException("ერთ-ერთი მითითებული თეგი არ არსებობს სისტემაში!");
+//        }
 
         Material material = Material.builder()
                 .title(dto.title())
