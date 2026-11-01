@@ -14,4 +14,4 @@ application-local.properties
 # Docker logs
 *.log
 
-testfiles/*
+testFiles/*
