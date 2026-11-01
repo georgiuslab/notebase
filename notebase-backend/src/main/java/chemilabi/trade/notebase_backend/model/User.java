@@ -36,6 +36,9 @@ public class User {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
+    @Column(name = "avatar")
+    private String avatar;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime createdAt;

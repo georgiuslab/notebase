@@ -11,9 +11,10 @@ public record UserDetailsResponseDto (
     String email,
     String role,
     Boolean isDeleted,
+    String avatar,
     OffsetDateTime createdAt
 ){
-    public static UserDetailsResponseDto fromEntity(User user) {
+    public static UserDetailsResponseDto fromEntity(User user, String avatar) {
         return new UserDetailsResponseDto(
                 user.getKeycloakId(),
                 user.getFirstName(),
@@ -21,6 +22,7 @@ public record UserDetailsResponseDto (
                 user.getEmail(),
                 user.getRole(),
                 user.getIsDeleted(),
+                avatar,
                 user.getCreatedAt()
         );
     }

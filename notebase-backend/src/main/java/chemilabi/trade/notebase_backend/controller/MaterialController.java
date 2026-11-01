@@ -11,9 +11,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/materials")
@@ -22,56 +20,49 @@ public class MaterialController {
     private final S3Service s3Service;
     private final MaterialService materialService;
 
-    public MaterialController(S3Service s3Service,
-                              MaterialService materialService) {
+    public MaterialController(S3Service s3Service, MaterialService materialService) {
         this.s3Service = s3Service;
         this.materialService = materialService;
     }
 
-    @Operation(summary = "PreSignedURL-ის გამოთხოვა ბაზიდან",
+    @Operation(summary = "PreSignedURL-ის გამოთხოვა",
             description = "აბრუნებს ბმულს, რომლის მეშვეობითაც S3-ზე აიტვირთება ფაილი, ბმული ძალაშია 10 წუთი")
-    @GetMapping("/presigned-url")
+    @GetMapping("/upload-url")
     public ResponseEntity<PresignedUrlResponseDto> getPresignedUrl(
             @RequestParam String fileName,
             @RequestParam String contentType,
             @RequestParam long fileSize,
             Principal principal) {
 
-        if (!"application/pdf".equalsIgnoreCase(contentType) ||
-                !fileName.toLowerCase().endsWith(".pdf")) {
-            throw new IllegalArgumentException("დასაშვებია მხოლოდ PDF ფაილების ატვირთვა");
-        }
-
-        long maxSizeBytes = 20L * 1024 * 1024; //20MB
-        if (fileSize > maxSizeBytes) {
-            throw new IllegalArgumentException("ფაილის ზომა არ უნდა აღემატებოდეს 20MB-ს");
-        }
-
-        JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) principal;
-        String userEmail = jwtToken.getToken().getClaimAsString("email");
-        String safeEmail = userEmail != null ? userEmail.replaceAll("[^a-zA-Z0-9-_.]", "_") : "anonymous";
-
-        PresignedUrlResponseDto url = s3Service.generatePresignedUploadUrl(fileName, contentType, safeEmail);
+        String safeEmail = extractSafeEmail(principal);
+        PresignedUrlResponseDto url =
+                s3Service.generatePresignedUploadUrl(fileName, contentType, fileSize, safeEmail);
         return ResponseEntity.ok(url);
     }
 
-    @Operation(summary = "ფაილის PreSignedURL-ით წარმატებული ატვირთვის მერე დადასტურება",
-            description = "ინახავს ფაილის მონაცემებს ბაზაში")
+    @Operation(summary = "ფაილის წარმატებული ატვირთვის დადასტურება",
+            description = "ამოწმებს ფაილს S3-ზე და ინახავს მონაცემებს ბაზაში")
     @PostMapping("/confirm")
-    public ResponseEntity<MaterialResponseDto> confirmUpload(@RequestBody MaterialCreateDto dto, Principal principal) {
+    public ResponseEntity<MaterialResponseDto> confirmUpload(@RequestBody MaterialCreateDto dto,
+                                                             Principal principal) {
+        String safeEmail = extractSafeEmail(principal);
+        s3Service.verifyUploadedPdf(dto.fileKey(), safeEmail);
+
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) principal;
         MaterialResponseDto response = materialService.saveMaterial(jwtToken, dto);
-
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "ყველა მასალის წამოღება", description = "მოაქვს აბსოლუტურად ყველა ატვირთული მასალა")
+    @Operation(summary = "ყველა მასალის წამოღება",
+            description = "მოაქვს ყველა ატვირთული მასალა")
     @GetMapping
     public ResponseEntity<List<MaterialResponseDto>> getAllMaterials() {
-        List<MaterialResponseDto> allMaterials = materialService.getAllMaterials();
-        if(materialService.getAllMaterials().isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(allMaterials);
+        return ResponseEntity.ok(materialService.getAllMaterials());
+    }
+
+    private String extractSafeEmail(Principal principal) {
+        JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) principal;
+        String email = jwtToken.getToken().getClaimAsString("email");
+        return email != null ? email.replaceAll("[^a-zA-Z0-9._-]", "_") : "anonymous";
     }
 }
