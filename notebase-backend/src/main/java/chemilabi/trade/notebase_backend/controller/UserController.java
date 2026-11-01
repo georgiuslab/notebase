@@ -44,6 +44,8 @@ public class UserController {
     @GetMapping("/users/{userId}/favorites")
     public ResponseEntity<List<MaterialResponseDto>> getFavoriteMaterials(@PathVariable String userId) {
         return ResponseEntity.ok(materialService.getFavoriteMaterials(userId));
+    }
+    
     @GetMapping
     public ResponseEntity<List<UserSummaryDto>> getAllUsers() {
         List <UserSummaryDto> allUsers =  userService.getAllUsers();

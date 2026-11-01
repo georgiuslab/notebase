@@ -2,9 +2,12 @@ package chemilabi.trade.notebase_backend.repository;
 
 import chemilabi.trade.notebase_backend.model.MaterialTag;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.Set;
 
-public interface MaterialTagRepository extends JpaRepository<MaterialTag,Long> {
-    Optional<MaterialTag> findByName(String tagName);
+@Repository
+public interface MaterialTagRepository extends JpaRepository<MaterialTag, Long> {
+
+    Set<MaterialTag> findAllByNameIn(Set<String> names);
 }
