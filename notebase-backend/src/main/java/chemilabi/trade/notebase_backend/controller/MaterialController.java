@@ -3,9 +3,14 @@ package chemilabi.trade.notebase_backend.controller;
 import chemilabi.trade.notebase_backend.aws.S3Service;
 import chemilabi.trade.notebase_backend.dto.MaterialCreateDto;
 import chemilabi.trade.notebase_backend.dto.MaterialResponseDto;
+import chemilabi.trade.notebase_backend.dto.PageResponse;
 import chemilabi.trade.notebase_backend.dto.PresignedUrlResponseDto;
+import chemilabi.trade.notebase_backend.model.enums.SortOption;
 import chemilabi.trade.notebase_backend.service.MaterialService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
@@ -58,6 +63,17 @@ public class MaterialController {
     @GetMapping
     public ResponseEntity<List<MaterialResponseDto>> getAllMaterials() {
         return ResponseEntity.ok(materialService.getAllMaterials());
+    }
+
+    @GetMapping("/search")
+    public PageResponse<MaterialResponseDto> search(
+            @RequestParam(required = false) @Size(max = 100) String q,
+            @RequestParam(required = false) List<@Size(max = 50) String> tags,
+            @RequestParam(defaultValue = "NEWEST") SortOption sort,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "12") @Min(1) @Max(50) int size) {
+
+        return materialService.search(q, tags, sort, page, size);
     }
 
     private String extractSafeEmail(Principal principal) {
