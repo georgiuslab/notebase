@@ -15,13 +15,13 @@ import chemilabi.trade.notebase_backend.repository.MaterialRepository;
 import chemilabi.trade.notebase_backend.repository.MaterialTagRepository;
 import chemilabi.trade.notebase_backend.repository.SubjectRepository;
 import chemilabi.trade.notebase_backend.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +44,7 @@ public class MaterialService {
         this.materialTagRepository = materialTagRepository;
     }
 
+    @Transactional
     public MaterialResponseDto saveMaterial(JwtAuthenticationToken token, MaterialCreateDto dto) {
         String keycloakId = token.getToken().getSubject();
 
@@ -76,6 +77,7 @@ public class MaterialService {
         return MaterialResponseDto.fromEntity(savedMaterial);
     }
 
+    @Transactional(readOnly = true)
     public List<MaterialResponseDto> getAllMaterials() {
         List<MaterialResponseDto> allMaterials = materialRepository.findAll().stream()
                 .map(MaterialResponseDto::fromEntity)
@@ -86,11 +88,13 @@ public class MaterialService {
         return allMaterials;
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<MaterialResponseDto> search(String q, List<String> tags,
                                                     SortOption sort, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, sort.toSort());
 
-        Specification<Material> spec = MaterialSpecifications.matchesText(q)
+        Specification<Material> spec = MaterialSpecifications.isApproved()
+                .and(MaterialSpecifications.matchesText(q))
                 .and(MaterialSpecifications.hasAnyTag(tags));
 
         Page<MaterialResponseDto> result = materialRepository
@@ -100,7 +104,7 @@ public class MaterialService {
         return PageResponse.from(result);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<MaterialResponseDto> getFavoriteMaterials(String userId) {
         User user = userRepository.findByKeycloakId(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));

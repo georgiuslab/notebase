@@ -65,15 +65,19 @@ public class MaterialController {
         return ResponseEntity.ok(materialService.getAllMaterials());
     }
 
+    @Operation(summary = "მასალის ძებნა სათაურის, აღწერის, თეგების, თარიღისა და რეიტინგის მიხედვით",
+            description = "გადაეცემა სათაური/აღწერა, თეგები, სორტირების ოფციები (newest/NEWEST, likes/LIKES)," +
+                    " გვერდი და გვერდზე მასალების რაოდენობა")
     @GetMapping("/search")
-    public PageResponse<MaterialResponseDto> search(
+    public ResponseEntity<PageResponse<MaterialResponseDto>> search(
             @RequestParam(required = false) @Size(max = 100) String q,
             @RequestParam(required = false) List<@Size(max = 50) String> tags,
-            @RequestParam(defaultValue = "NEWEST") SortOption sort,
+            @RequestParam(defaultValue = "NEWEST") String sort,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "12") @Min(1) @Max(50) int size) {
 
-        return materialService.search(q, tags, sort, page, size);
+        SortOption upperCase = SortOption.valueOf(sort.toUpperCase());
+        return ResponseEntity.ok(materialService.search(q, tags, upperCase, page, size));
     }
 
     private String extractSafeEmail(Principal principal) {
