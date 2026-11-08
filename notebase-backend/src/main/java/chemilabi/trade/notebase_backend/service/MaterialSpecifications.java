@@ -2,6 +2,7 @@ package chemilabi.trade.notebase_backend.service;
 
 import chemilabi.trade.notebase_backend.model.Material;
 import chemilabi.trade.notebase_backend.model.MaterialTag;
+import chemilabi.trade.notebase_backend.model.enums.MaterialStatus;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
@@ -36,6 +37,11 @@ public final class MaterialSpecifications {
                     tag.get("name").in(tags));
             return cb.exists(sub);
         };
+    }
+
+    public  static Specification<Material> isApproved(){
+        return (root, query, cb) ->
+                cb.equal(root.get("status"), MaterialStatus.APPROVED);
     }
 
     private static String escapeLike(String s) {
