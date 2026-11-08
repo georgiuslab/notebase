@@ -1,7 +1,7 @@
 package chemilabi.trade.notebase_backend.service;
 
 import chemilabi.trade.notebase_backend.dto.MaterialResponseDto;
-import chemilabi.trade.notebase_backend.dto.UserSummaryDto;
+import chemilabi.trade.notebase_backend.dto.PageResponse;
 import chemilabi.trade.notebase_backend.exception.ResourceNotFoundException;
 import chemilabi.trade.notebase_backend.exception.UserNotFoundException;
 import chemilabi.trade.notebase_backend.model.Material;
@@ -10,20 +10,23 @@ import chemilabi.trade.notebase_backend.model.Subject;
 import chemilabi.trade.notebase_backend.model.User;
 import chemilabi.trade.notebase_backend.dto.MaterialCreateDto;
 import chemilabi.trade.notebase_backend.model.enums.MaterialStatus;
+import chemilabi.trade.notebase_backend.model.enums.SortOption;
 import chemilabi.trade.notebase_backend.repository.MaterialRepository;
 import chemilabi.trade.notebase_backend.repository.MaterialTagRepository;
 import chemilabi.trade.notebase_backend.repository.SubjectRepository;
 import chemilabi.trade.notebase_backend.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-//ექსეფშენები მაქვს დასამუშავებელი!!!
+
 @Service
 public class MaterialService {
     private final MaterialRepository materialRepository;
@@ -81,6 +84,20 @@ public class MaterialService {
             throw new ResourceNotFoundException("No material found");
         }
         return allMaterials;
+    }
+
+    public PageResponse<MaterialResponseDto> search(String q, List<String> tags,
+                                                    SortOption sort, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, sort.toSort());
+
+        Specification<Material> spec = MaterialSpecifications.matchesText(q)
+                .and(MaterialSpecifications.hasAnyTag(tags));
+
+        Page<MaterialResponseDto> result = materialRepository
+                .findAll(spec, pageable)
+                .map(MaterialResponseDto::fromEntity);
+
+        return PageResponse.from(result);
     }
 
     @Transactional

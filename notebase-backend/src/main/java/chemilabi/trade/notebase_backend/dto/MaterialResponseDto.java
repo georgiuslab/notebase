@@ -16,6 +16,7 @@ public record MaterialResponseDto(
         String status,
         UserSummaryDto uploader,
         String subjectName,
+        int likesCount,
         Set<String> tags,
         LocalDateTime createdAt
 ) {
@@ -34,6 +35,7 @@ public record MaterialResponseDto(
                 material.getStatus().name(),
                 UserSummaryDto.fromEntity(material.getUploader()),
                 material.getSubject().getName(),
+                material.getLikesCount(),
                 tagNames,
                 material.getCreatedAt()
         );

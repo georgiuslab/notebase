@@ -32,6 +32,9 @@ public class Material {
     @Column(nullable = false)
     private MaterialStatus status;
 
+    @Column(name = "likes_count", nullable = false, columnDefinition = "integer default 0")
+    private int likesCount = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploader_id", referencedColumnName = "keycloak_id", nullable = false)
     private User uploader;
