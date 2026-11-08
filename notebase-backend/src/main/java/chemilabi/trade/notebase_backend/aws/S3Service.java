@@ -125,7 +125,7 @@ public class S3Service {
             throw new IllegalArgumentException("ფაილის ზომა უნდა იყოს 1 ბაიტიდან 20MB-მდე");
         }
 
-        String safeName = fileName.replaceAll("[^a-zA-Z0-9._-]", "_");
+        String safeName = fileName.replaceAll("[^a-zA-Z0-9._\\u10A0-\\u10FF\\u0400-\\u04FF-]", "_");
         String key = userPrefix(safeEmail) + UUID.randomUUID() + "_" + safeName;
 
         PutObjectRequest objectRequest = PutObjectRequest.builder()
