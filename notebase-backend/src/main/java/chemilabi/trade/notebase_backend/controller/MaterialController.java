@@ -80,6 +80,12 @@ public class MaterialController {
         return ResponseEntity.ok(materialService.search(q, tags, upperCase, page, size));
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<MaterialResponseDto> getMaterial(@PathVariable Long id) {
+        MaterialResponseDto responseDto = materialService.getMaterial(id);
+        return ResponseEntity.ok(responseDto);
+    }
+
     private String extractSafeEmail(Principal principal) {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) principal;
         String email = jwtToken.getToken().getClaimAsString("email");

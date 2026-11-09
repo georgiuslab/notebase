@@ -1,7 +1,9 @@
 package chemilabi.trade.notebase_backend.service;
 
+import chemilabi.trade.notebase_backend.aws.S3Service;
 import chemilabi.trade.notebase_backend.dto.MaterialResponseDto;
 import chemilabi.trade.notebase_backend.dto.PageResponse;
+import chemilabi.trade.notebase_backend.dto.UserSummaryDto;
 import chemilabi.trade.notebase_backend.exception.ResourceNotFoundException;
 import chemilabi.trade.notebase_backend.exception.UserNotFoundException;
 import chemilabi.trade.notebase_backend.model.Material;
@@ -23,9 +25,11 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class MaterialService {
@@ -33,15 +37,18 @@ public class MaterialService {
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
     private final MaterialTagRepository materialTagRepository;
+    private final S3Service s3Service;
 
     public MaterialService(MaterialRepository materialRepository,
                            SubjectRepository subjectRepository,
                            UserRepository userRepository,
-                           MaterialTagRepository materialTagRepository) {
+                           MaterialTagRepository materialTagRepository,
+                           S3Service s3Service) {
         this.materialRepository = materialRepository;
         this.subjectRepository = subjectRepository;
         this.userRepository = userRepository;
         this.materialTagRepository = materialTagRepository;
+        this.s3Service = s3Service;
     }
 
     @Transactional
@@ -112,5 +119,33 @@ public class MaterialService {
         return user.getFavorites().stream()
                 .map(MaterialResponseDto::fromEntity)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public MaterialResponseDto getMaterial(Long id) {
+        Material material = materialRepository.findByIdAndStatusNot(id, MaterialStatus.PENDING)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Material with ID " + id + " not found or is awaiting approval")
+                );
+        String downloadUrl = s3Service.generatePresignedDownloadUrl(material.getFileUrl());
+
+        Set<String> tagNames = material.getTags() != null
+                ? material.getTags().stream()
+                .map(MaterialTag::getName)
+                .collect(Collectors.toSet())
+                : Collections.emptySet();
+
+        return new MaterialResponseDto(
+                material.getId(),
+                material.getTitle(),
+                material.getDescription(),
+                downloadUrl,
+                material.getStatus().name(),
+                UserSummaryDto.fromEntity(material.getUploader()),
+                material.getSubject().getName(),
+                material.getLikesCount(),
+                tagNames,
+                material.getCreatedAt()
+        );
     }
 }
