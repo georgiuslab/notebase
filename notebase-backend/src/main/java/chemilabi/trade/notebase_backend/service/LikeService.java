@@ -5,6 +5,7 @@ import chemilabi.trade.notebase_backend.exception.UserNotFoundException;
 import chemilabi.trade.notebase_backend.model.Like;
 import chemilabi.trade.notebase_backend.model.Material;
 import chemilabi.trade.notebase_backend.model.User;
+import chemilabi.trade.notebase_backend.model.enums.MaterialStatus;
 import chemilabi.trade.notebase_backend.repository.LikeRepository;
 import chemilabi.trade.notebase_backend.repository.MaterialRepository;
 import chemilabi.trade.notebase_backend.repository.UserRepository;
@@ -24,27 +25,23 @@ public class LikeService {
     @Transactional
     public void like(String keycloakId, Long materialId) {
         Material material = materialRepository.findById(materialId)
-                .orElseThrow(() -> new ResourceNotFoundException("Material with id: " + materialId + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Material with id: " + materialId +
+                        " not found or is awaiting approval"));
 
-        if (likeRepository.existsByUser_KeycloakIdAndMaterial_Id(keycloakId, materialId)) {
-            return;
+        if(!material.getStatus().equals(MaterialStatus.APPROVED)){
+            throw new ResourceNotFoundException("Material with id: " + materialId +
+                    " not found or is awaiting approval");
         }
 
         User user = userRepository.findByKeycloakId(keycloakId)
                 .orElseThrow(() -> new UserNotFoundException("User with id " + keycloakId + " not found"));
 
-        try {
-            likeRepository.saveAndFlush(new Like(material, user));
-        } catch (DataIntegrityViolationException e) {
-            return;
-        }
-        materialRepository.incrementLikes(materialId);
-    }
-
-    @Transactional
-    public void unlike(String keycloakId, Long materialId) {
-        if (likeRepository.deleteByUser_KeycloakIdAndMaterial_Id(keycloakId, materialId) > 0) {
+        if (likeRepository.existsByUser_KeycloakIdAndMaterial_Id(keycloakId, materialId)) {
+            likeRepository.deleteByUser_KeycloakIdAndMaterial_Id(keycloakId, materialId);
             materialRepository.decrementLikes(materialId);
+        } else {
+            likeRepository.saveAndFlush(new Like(material, user));
+            materialRepository.incrementLikes(materialId);
         }
     }
 }
