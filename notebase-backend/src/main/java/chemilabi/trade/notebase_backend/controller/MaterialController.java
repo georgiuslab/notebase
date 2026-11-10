@@ -5,6 +5,7 @@ import chemilabi.trade.notebase_backend.dto.MaterialCreateDto;
 import chemilabi.trade.notebase_backend.dto.MaterialResponseDto;
 import chemilabi.trade.notebase_backend.dto.PageResponse;
 import chemilabi.trade.notebase_backend.dto.PresignedUrlResponseDto;
+import chemilabi.trade.notebase_backend.exception.UserNotFoundException;
 import chemilabi.trade.notebase_backend.model.enums.SortOption;
 import chemilabi.trade.notebase_backend.service.LikeService;
 import chemilabi.trade.notebase_backend.service.MaterialService;
@@ -12,7 +13,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,8 +70,10 @@ public class MaterialController {
     @Operation(summary = "ყველა მასალის წამოღება",
             description = "მოაქვს ყველა ატვირთული მასალა")
     @GetMapping
-    public ResponseEntity<List<MaterialResponseDto>> getAllMaterials() {
-        return ResponseEntity.ok(materialService.getAllMaterials());
+    public ResponseEntity<List<MaterialResponseDto>> getAllMaterials(Principal principal) {
+        String keycloakId = getKeycloakId(principal);
+
+        return ResponseEntity.ok(materialService.getAllMaterials(keycloakId));
     }
 
     @Operation(summary = "მასალის ძებნა სათაურის, აღწერის, თეგების, თარიღისა და რეიტინგის მიხედვით",
@@ -79,24 +85,27 @@ public class MaterialController {
             @RequestParam(required = false) List<@Size(max = 50) String> tags,
             @RequestParam(defaultValue = "NEWEST") String sort,
             @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "12") @Min(1) @Max(50) int size) {
+            @RequestParam(defaultValue = "12") @Min(1) @Max(50) int size,
+            Principal principal) {
+
+        String keycloakId = getKeycloakId(principal);
 
         SortOption upperCase = SortOption.valueOf(sort.toUpperCase());
-        return ResponseEntity.ok(materialService.search(q, tags, upperCase, page, size));
+        return ResponseEntity.ok(materialService.search(q, tags, upperCase, page, size, keycloakId));
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<MaterialResponseDto> getMaterial(@PathVariable Long id) {
-        MaterialResponseDto responseDto = materialService.getMaterial(id);
+    public ResponseEntity<MaterialResponseDto> getMaterial(@PathVariable Long id,
+                                                           Principal principal) {
+        String keycloakId = getKeycloakId(principal);
+        MaterialResponseDto responseDto = materialService.getMaterial(id, keycloakId);
         return ResponseEntity.ok(responseDto);
     }
 
     @PostMapping("/{materialId}/like")
     public ResponseEntity<Void> likeMaterial(@PathVariable("materialId") Long materialId,
                                              Principal principal) {
-        JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) principal;
-        String keycloakId = jwtToken.getToken().getSubject();
-
+        String keycloakId = getKeycloakId(principal);
         likeService.like(keycloakId, materialId);
         return ResponseEntity.ok().build();
     }
@@ -105,5 +114,16 @@ public class MaterialController {
         JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) principal;
         String email = jwtToken.getToken().getClaimAsString("email");
         return email != null ? email.replaceAll("[^a-zA-Z0-9._-]", "_") : "anonymous";
+    }
+
+    private String getKeycloakId(Principal principal) {
+        JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) principal;
+        String keycloakId = jwtToken.getToken().getSubject();
+
+        if(keycloakId == null){
+            throw new UserNotFoundException("Not Authenticated");
+        }
+
+        return keycloakId;
     }
 }

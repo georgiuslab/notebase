@@ -2,6 +2,7 @@ package chemilabi.trade.notebase_backend.dto;
 
 import chemilabi.trade.notebase_backend.model.Material;
 import chemilabi.trade.notebase_backend.model.MaterialTag;
+import chemilabi.trade.notebase_backend.repository.LikeRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -17,10 +18,11 @@ public record MaterialResponseDto(
         UserSummaryDto uploader,
         String subjectName,
         int likesCount,
+        boolean isLikedByCurrentUser,
         Set<String> tags,
         LocalDateTime createdAt
 ) {
-    public static MaterialResponseDto fromEntity(Material material) {
+    public static MaterialResponseDto fromEntity(Material material, boolean isLikedByCurrentUser) {
         Set<String> tagNames = material.getTags() != null
                 ? material.getTags().stream()
                 .map(MaterialTag::getName)
@@ -36,6 +38,7 @@ public record MaterialResponseDto(
                 UserSummaryDto.fromEntity(material.getUploader()),
                 material.getSubject().getName(),
                 material.getLikesCount(),
+                isLikedByCurrentUser,
                 tagNames,
                 material.getCreatedAt()
         );
