@@ -6,6 +6,7 @@ import chemilabi.trade.notebase_backend.dto.MaterialResponseDto;
 import chemilabi.trade.notebase_backend.dto.PageResponse;
 import chemilabi.trade.notebase_backend.dto.PresignedUrlResponseDto;
 import chemilabi.trade.notebase_backend.model.enums.SortOption;
+import chemilabi.trade.notebase_backend.service.LikeService;
 import chemilabi.trade.notebase_backend.service.MaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.Max;
@@ -24,10 +25,14 @@ public class MaterialController {
 
     private final S3Service s3Service;
     private final MaterialService materialService;
+    private final LikeService likeService;
 
-    public MaterialController(S3Service s3Service, MaterialService materialService) {
+    public MaterialController(S3Service s3Service,
+                              MaterialService materialService,
+                              LikeService likeService) {
         this.s3Service = s3Service;
         this.materialService = materialService;
+        this.likeService = likeService;
     }
 
     @Operation(summary = "PreSignedURL-ის გამოთხოვა",
@@ -84,6 +89,16 @@ public class MaterialController {
     public ResponseEntity<MaterialResponseDto> getMaterial(@PathVariable Long id) {
         MaterialResponseDto responseDto = materialService.getMaterial(id);
         return ResponseEntity.ok(responseDto);
+    }
+
+    @PostMapping("/{materialId}/like")
+    public ResponseEntity<Void> likeMaterial(@PathVariable("materialId") Long materialId,
+                                             Principal principal) {
+        JwtAuthenticationToken jwtToken = (JwtAuthenticationToken) principal;
+        String keycloakId = jwtToken.getToken().getSubject();
+
+        likeService.like(keycloakId, materialId);
+        return ResponseEntity.ok().build();
     }
 
     private String extractSafeEmail(Principal principal) {
