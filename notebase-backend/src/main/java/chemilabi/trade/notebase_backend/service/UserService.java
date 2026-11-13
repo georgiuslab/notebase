@@ -79,7 +79,10 @@ public class UserService {
 
     public List<UserSummaryDto> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(UserSummaryDto::fromEntity)
+                .map(user -> {
+                    String avatar = s3Service.generatePresignedDownloadUrl(user.getAvatar());
+                    return UserSummaryDto.fromEntity(user, avatar);
+                })
                 .toList();
     }
 }

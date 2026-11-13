@@ -8,13 +8,16 @@ public record UserSummaryDto(
         String keycloakId,
         String firstName,
         String lastName,
-        String email
+        String email,
+        String avatar
 ) {
-    public static UserSummaryDto fromEntity(User user){
+    public static UserSummaryDto fromEntity(User user, String avatar) {
         return new UserSummaryDto(
                 user.getKeycloakId(),
                 user.getFirstName(),
                 user.getLastName(),
-                user.getEmail());
+                user.getEmail(),
+                avatar
+        );
     }
 }

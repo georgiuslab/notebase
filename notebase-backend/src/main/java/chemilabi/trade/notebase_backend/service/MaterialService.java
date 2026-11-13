@@ -22,10 +22,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,6 +58,8 @@ public class MaterialService {
         Subject subject = subjectRepository.findById(dto.subjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Subject with ID " + dto.subjectId() + " not found"));
 
+        String avatar = s3Service.generatePresignedDownloadUrl(uploader.getAvatar());
+
         Set<MaterialTag> managedTags = new HashSet<>();
         if (dto.tagNames() != null && !dto.tagNames().isEmpty()) {
             managedTags = materialTagRepository.findAllByNameIn(dto.tagNames());
@@ -78,7 +77,7 @@ public class MaterialService {
 
         Material savedMaterial = materialRepository.save(material);
 
-        return MaterialResponseDto.fromEntity(savedMaterial, false);
+        return MaterialResponseDto.fromEntity(savedMaterial, false, avatar);
     }
 
     @Transactional(readOnly = true)
@@ -88,11 +87,17 @@ public class MaterialService {
             throw new ResourceNotFoundException("No material found");
         }
 
+        User user = userRepository.findByKeycloakId(keycloakId).orElseThrow(
+                () -> new UserNotFoundException("User with ID " + keycloakId + " not found")
+        );
+
+        String avatar = s3Service.generatePresignedDownloadUrl(user.getAvatar());
+
         return allMaterials.stream()
                 .map(material -> {
                     boolean isLiked = keycloakId != null &&
                             likeRepository.existsByUser_KeycloakIdAndMaterial_Id(keycloakId, material.getId());
-                    return MaterialResponseDto.fromEntity(material, isLiked);
+                    return MaterialResponseDto.fromEntity(material, isLiked, avatar);
                 })
                 .toList();
     }
@@ -107,12 +112,18 @@ public class MaterialService {
                 .and(MaterialSpecifications.matchesText(q))
                 .and(MaterialSpecifications.hasAnyTag(tags));
 
+        User user = userRepository.findByKeycloakId(keycloakId).orElseThrow(
+                () -> new UserNotFoundException("User with ID " + keycloakId + " not found")
+        );
+
+        String avatar = s3Service.generatePresignedDownloadUrl(user.getAvatar());
+
         Page<MaterialResponseDto> result = materialRepository
                 .findAll(spec, pageable)
                 .map(material -> {
                     boolean isLiked = keycloakId != null &&
                             likeRepository.existsByUser_KeycloakIdAndMaterial_Id(keycloakId, material.getId());
-                    return MaterialResponseDto.fromEntity(material, isLiked);
+                    return MaterialResponseDto.fromEntity(material, isLiked, avatar);
                 });
 
         return PageResponse.from(result);
@@ -123,11 +134,13 @@ public class MaterialService {
         User user = userRepository.findByKeycloakId(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found"));
 
+        String avatar = s3Service.generatePresignedDownloadUrl(user.getAvatar());
+
         return user.getFavorites().stream()
                 .map(material -> {
                     boolean isLiked = userId != null &&
                             likeRepository.existsByUser_KeycloakIdAndMaterial_Id(userId, material.getId());
-                    return MaterialResponseDto.fromEntity(material, isLiked);
+                    return MaterialResponseDto.fromEntity(material, isLiked, avatar);
                 })
                 .toList();
     }
@@ -139,6 +152,12 @@ public class MaterialService {
                         "Material with ID " + id + " not found or is awaiting approval")
                 );
         String downloadUrl = s3Service.generatePresignedDownloadUrl(material.getFileUrl());
+
+        User user = userRepository.findByKeycloakId(keycloakId).orElseThrow(
+                () -> new UserNotFoundException("user with id: " + keycloakId + " not found")
+        );
+
+        String avatar = s3Service.generatePresignedDownloadUrl(user.getAvatar());
 
         boolean isLiked = keycloakId != null &&
                 likeRepository.existsByUser_KeycloakIdAndMaterial_Id(keycloakId, id);
@@ -155,7 +174,7 @@ public class MaterialService {
                 material.getDescription(),
                 downloadUrl,
                 material.getStatus().name(),
-                UserSummaryDto.fromEntity(material.getUploader()),
+                UserSummaryDto.fromEntity(material.getUploader(), avatar),
                 material.getSubject().getName(),
                 material.getLikesCount(),
                 isLiked,
