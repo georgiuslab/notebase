@@ -22,7 +22,10 @@ public record MaterialResponseDto(
         Set<String> tags,
         LocalDateTime createdAt
 ) {
-    public static MaterialResponseDto fromEntity(Material material, boolean isLikedByCurrentUser) {
+    public static MaterialResponseDto fromEntity(Material material,
+                                                 boolean isLikedByCurrentUser,
+                                                 String avatar
+                                                 ) {
         Set<String> tagNames = material.getTags() != null
                 ? material.getTags().stream()
                 .map(MaterialTag::getName)
@@ -35,7 +38,7 @@ public record MaterialResponseDto(
                 material.getDescription(),
                 material.getFileUrl(),
                 material.getStatus().name(),
-                UserSummaryDto.fromEntity(material.getUploader()),
+                UserSummaryDto.fromEntity(material.getUploader(), avatar),
                 material.getSubject().getName(),
                 material.getLikesCount(),
                 isLikedByCurrentUser,
