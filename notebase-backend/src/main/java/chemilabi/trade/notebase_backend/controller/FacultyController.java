@@ -1,15 +1,13 @@
 package chemilabi.trade.notebase_backend.controller;
 
+import chemilabi.trade.notebase_backend.dto.FacultyCreateDto;
 import chemilabi.trade.notebase_backend.dto.FacultyResponseDto;
 import chemilabi.trade.notebase_backend.dto.SubjectResponseDto;
-import chemilabi.trade.notebase_backend.model.Faculty;
 import chemilabi.trade.notebase_backend.service.FacultyService;
 import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,6 +27,20 @@ public class FacultyController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(faculties);
+    }
+
+    @Operation(summary = "ახალი ფაკულტეტის დამატება", description = "ამატებს ახალ ფაკულტეტს ან აღადგენს ადრე წაშლილს")
+    @PostMapping
+    public ResponseEntity<FacultyResponseDto> createFaculty(@RequestBody FacultyCreateDto dto) {
+        FacultyResponseDto created = facultyService.createFaculty(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @Operation(summary = "ფაკულტეტის წაშლა (Soft Delete)", description = "ცვლის isDeleted ველს true-ზე")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteFaculty(@PathVariable Long id) {
+        facultyService.deleteFaculty(id);
+        return ResponseEntity.noContent().build(); //204
     }
 
     @Operation(summary = "მოაქვს კონკრეტული ფაკულტეტის საგნები", description = "ფაილის ატვირთვის ფორმაში, " +
