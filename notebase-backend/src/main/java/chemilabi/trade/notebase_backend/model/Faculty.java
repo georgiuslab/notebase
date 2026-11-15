@@ -23,6 +23,9 @@ public class Faculty {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
     @OneToMany(mappedBy = "faculty")
     private Set<Subject> subjects = new HashSet<>();
 
