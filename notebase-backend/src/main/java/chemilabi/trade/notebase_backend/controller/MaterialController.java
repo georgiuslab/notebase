@@ -7,12 +7,14 @@ import chemilabi.trade.notebase_backend.dto.PageResponse;
 import chemilabi.trade.notebase_backend.dto.PresignedUrlResponseDto;
 import chemilabi.trade.notebase_backend.exception.UserNotFoundException;
 import chemilabi.trade.notebase_backend.model.enums.SortOption;
+import chemilabi.trade.notebase_backend.service.FavoriteService;
 import chemilabi.trade.notebase_backend.service.LikeService;
 import chemilabi.trade.notebase_backend.service.MaterialService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
@@ -21,20 +23,14 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/materials")
 public class MaterialController {
 
     private final S3Service s3Service;
     private final MaterialService materialService;
     private final LikeService likeService;
-
-    public MaterialController(S3Service s3Service,
-                              MaterialService materialService,
-                              LikeService likeService) {
-        this.s3Service = s3Service;
-        this.materialService = materialService;
-        this.likeService = likeService;
-    }
+    private final FavoriteService favoriteService;
 
     @Operation(summary = "PreSignedURL-ის გამოთხოვა",
             description = "აბრუნებს ბმულს, რომლის მეშვეობითაც S3-ზე აიტვირთება ფაილი, ბმული ძალაშია 10 წუთი")
@@ -91,6 +87,8 @@ public class MaterialController {
         return ResponseEntity.ok(materialService.search(q, tags, upperCase, page, size, keycloakId));
     }
 
+    @Operation(summary = "კონკრეტული მასალის წამოღება",
+            description = "გადაეცემა მასალის ID და მოაქვს შესაბამისი მასალა")
     @GetMapping("{id}")
     public ResponseEntity<MaterialResponseDto> getMaterial(@PathVariable Long id,
                                                            Principal principal) {
@@ -99,11 +97,23 @@ public class MaterialController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @Operation(summary = "კონკრეტული მასალის მოწონებულებში დამატება/წაშლა",
+            description = "თუ მასალა მოწონებულებში არაა დამატებული, ამატებს, თუ უკვე არსებობს - წაშლის")
     @PostMapping("/{materialId}/like")
     public ResponseEntity<Void> likeMaterial(@PathVariable("materialId") Long materialId,
                                              Principal principal) {
         String keycloakId = getKeycloakId(principal);
         likeService.like(keycloakId, materialId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "კონკრეტული მასალის ფავორიტებში დამატება/წაშლა",
+            description = "თუ მასალა ფავორიტებში არაა დამატებული, ამატებს, თუ უკვე არსებობს - წაშლის")
+    @PostMapping("/{materialId}/favorite")
+    public ResponseEntity<Void> addToFavorites(@PathVariable("materialId") Long materialId,
+                                               Principal principal) {
+        String keycloakId = getKeycloakId(principal);
+        favoriteService.toggleFavorites(keycloakId, materialId);
         return ResponseEntity.ok().build();
     }
 
