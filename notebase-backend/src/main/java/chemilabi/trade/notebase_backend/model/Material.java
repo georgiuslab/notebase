@@ -54,6 +54,16 @@ public class Material {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reviewed_by", referencedColumnName = "keycloak_id")
+    private User reviewedBy;
+
+    @Column(name = "reviewed_at", updatable = false)
+    private LocalDateTime reviewedAt;
+
+    @Column(columnDefinition = "TEXT")
+    private String rejectionReason;
+
     @OneToMany(mappedBy = "material", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Like> likes = new HashSet<>();
 
